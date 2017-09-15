@@ -1,0 +1,346 @@
+void shootEnemy(int board[BOARD_Y][BOARD_X], enemyUnit *en, unit *un, int distance);
+void moveEnemy(int board[BOARD_Y][BOARD_X], enemyUnit *en, unit un);
+void commandEnemy(int board[BOARD_Y][BOARD_X], enemyUnit *en, unit squad[6], enemyUnit enemies[NUM_ENEMIES]);
+void enemyTurn(int board[BOARD_Y][BOARD_X], unit squad[6], enemyUnit enemies[NUM_ENEMIES], int *enemiesLeft);
+
+int calcCover2(int board[BOARD_Y][BOARD_X], enemyUnit en, unit un){
+    int cover;
+        if(en.location.x < un.location.x){ //Enemy is left of target
+            if(un.location.y < en.location.y){ // Left and above, left and above cover count, taking higher value
+                int cover1, cover2;
+                switch (board[un.location.y][--un.location.x]){ // Left Cover
+                    case 0: // no cover
+                        cover1 = 0;
+                        break;
+                    case 3: //full cover
+                        cover1 = 40;
+                        break;
+                    case 4: //half cover
+                        cover1 = 20;
+                        break;
+                    default:
+                        cover1 = 0;
+                        break;
+                }
+                switch (board[--un.location.y][un.location.x]){ // Top Cover
+                    case 0: // no cover
+                        cover2 = 0;
+                        break;
+                    case 3: //full cover
+                        cover2 = 40;
+                        break;
+                    case 4: //half cover
+                        cover2 = 20;
+                        break;
+                    default:
+                        cover2 = 0;
+                        break;
+                }
+                if(cover1 > cover2)
+                    cover = cover1;
+                else
+                    cover = cover2;
+            }
+        else if(un.location.y == en.location.y){// Directly Left, only left cover value counts
+            switch (board[un.location.y][--un.location.x]){
+                case 0: // no cover
+                    cover = 0;
+                    break;
+                case 3: //full cover
+                    cover = 40;
+                    break;
+                case 4: //half cover
+                    cover = 20;
+                    break;
+                default:
+                    cover = 0;
+                    break;
+            }
+        }
+        else{ // Left and below, left and below cover count, taking higher value
+            int cover1, cover2;
+            switch (board[un.location.y][--un.location.x]){ // Left Cover
+                case 0: // no cover
+                    cover1 = 0;
+                    break;
+                case 3: //full cover
+                    cover1 = 40;
+                    break;
+                case 4: //half cover
+                    cover1 = 20;
+                    break;
+                default:
+                    cover1 = 0;
+                    break;
+            }
+            switch (board[++un.location.y][un.location.x]){ // Below Cover
+                case 0: // no cover
+                    cover2 = 0;
+                    break;
+                case 3: //full cover
+                    cover2 = 40;
+                    break;
+                case 4: //half cover
+                    cover2 = 20;
+                    break;
+                default:
+                    cover2 = 0;
+                    break;
+            }
+            if(cover1 > cover2)
+                cover = cover1;
+            else
+                cover = cover2;
+        }
+    }
+    else if(en.location.x == un.location.x){ // Enemy is directly above or below target
+        if(un.location.y < en.location.y){ //Enemy above target
+            switch (board[--un.location.y][un.location.x]){
+                case 0: // no cover
+                    cover = 0;
+                    break;
+                case 3: //full cover
+                    cover = 40;
+                    break;
+                case 4: //half cover
+                    cover = 20;
+                    break;
+                default:
+                    cover = 0;
+                    break;
+            }
+        }
+        else { //Unit is below target
+            switch (board[++un.location.y][un.location.x]){
+                case 0: // no cover
+                    cover = 0;
+                    break;
+                case 3: //full cover
+                    cover = 40;
+                    break;
+                case 4: //half cover
+                    cover = 20;
+                    break;
+                default:
+                    cover = 0;
+                    break;
+            }
+        }
+    }
+    else{ //Unit is right of enemy
+        if(en.location.y < un.location.y){ // Right and above, right and above cover count, taking higher value
+            int cover1, cover2;
+            switch (board[un.location.y][++un.location.x]){ // Right Cover
+                case 0: // no cover
+                    cover1 = 0;
+                    break;
+                case 3: //full cover
+                    cover1 = 40;
+                    break;
+                case 4: //half cover
+                    cover1 = 20;
+                    break;
+                default:
+                    cover1 = 0;
+                    break;
+            }
+            switch (board[--un.location.y][un.location.x]){ // Top Cover
+                case 0: // no cover
+                    cover2 = 0;
+                    break;
+                case 3: //full cover
+                    cover2 = 40;
+                    break;
+                case 4: //half cover
+                    cover2 = 20;
+                    break;
+                default:
+                    cover2 = 0;
+                    break;
+            }
+            if(cover1 > cover2)
+                cover = cover1;
+            else
+                cover = cover2;
+        }
+        else if(un.location.y == en.location.y){// Directly Right, only left cover value counts
+            switch (board[un.location.y][++un.location.x]){
+                case 0: // no cover
+                    cover = 0;
+                    break;
+                case 3: //full cover
+                    cover = 40;
+                    break;
+                case 4: //half cover
+                    cover = 20;
+                    break;
+                default:
+                    cover = 0;
+                    break;
+            }
+        }
+        else{ // Right and below, left and below cover count, taking higher value
+            int cover1, cover2;
+            switch (board[un.location.y][++un.location.x]){ // Right Cover
+                case 0: // no cover
+                    cover1 = 0;
+                    break;
+                case 3: //full cover
+                    cover1 = 40;
+                    break;
+                case 4: //half cover
+                    cover1 = 20;
+                    break;
+                default:
+                    cover1 = 0;
+                    break;
+            }
+            switch (board[++un.location.y][un.location.x]){ // Below Cover
+                case 0: // no cover
+                    cover2 = 0;
+                    break;
+                case 3: //full cover
+                    cover2 = 40;
+                    break;
+                case 4: //half cover
+                    cover2 = 20;
+                    break;
+                default:
+                    cover2 = 0;
+                    break;
+            }
+            if(cover1 > cover2)
+                cover = cover1;
+            else
+                cover = cover2;
+        }
+    }
+
+    return cover;
+}
+void shootEnemy(int board[BOARD_Y][BOARD_X], enemyUnit *en, unit *un, int distance){
+    int cover = calcCover2(board, *en, *un);
+    double chance = en->aim - .5 * distance - cover;
+    double shot;
+    srand(time(0));
+    shot = rand() % 100 + 1;
+    //printf("Enemy rolled a %lf\n", shot);
+    if(shot > chance){
+        printf("\n Enemy shot missed. \nEnemy unscathed.\n", un->rank, un->name);
+    }
+    else{
+        int damage = 3;
+        int damageModifier = 2;
+        srand(time(0));
+        double modify = rand() % 100 + 1;
+        if(modify < 75){
+            un->hp-= damage;
+        }
+        else if(modify > 75 && modify < 85){ //Subtract damage modifier
+            damage -= damageModifier;
+            un->hp -= damage;
+        }
+        else{
+            damage += damageModifier;
+            un->hp -= damage;
+        }
+        printf("Enemy shot connected. \nYour unit was damaged for %d hp. \n", un->rank, un->name, damage);
+    }
+    system("pause");
+    return;
+
+    return;
+
+}
+
+void moveEnemy(int board[BOARD_Y][BOARD_X], enemyUnit *en, unit un){
+    loc closestCover;
+    int temp, distance = 1000000;
+    int i, j;
+    if(en->location.x > un.location.x){ //Enemy is right of unit
+        printf("ENEMY MOVING LEFT\n");
+        for(i = 0; i < BOARD_Y; i++){ //iterate through left side of board to find cover with minimum distance to a player unit in enemy movement range.
+            for(j = 0; j < en->location.x; j++){
+                temp = abs(en->location.y - i) + abs(en->location.y - j);
+                if(temp > en->mobility){ //IF OUT OF MOVEMENT RANGE
+                    continue;
+                }
+                if(board[i][j] == 3 || board[i][j] == 4){ //IN RANGE AND CLOSER TO TARGET UNIT
+                    if(abs(i - un.location.y) + abs(j - un.location.x) < distance){
+                        distance = abs(i - un.location.y) + abs(j - un.location.x);
+                        closestCover.x = j;
+                        closestCover.y = i;
+                    }
+                }
+            }
+        }
+        updateBoard(board, en->location.y, en->location.x, 0);
+        en->location.x = closestCover.x + 1; //Puts on opposite side of cover
+        en->location.y = closestCover.y;
+        updateBoard(board, en->location.y, en->location.x, 2);
+    }
+    else if(en->location.x = un.location.x){ //Enemy is above or below unit
+        printf("ENEMY NEEDS TO MOVE UP OR DOWN\n");
+    }
+    else{ //Enemy is left of unit
+         printf("ENEMY MOVING RIGHT\n");
+        for(i = 0; i < BOARD_Y; i++){ //iterate through left side of board to find cover with minimum distance to a player unit in enemy movement range.
+            for(j = en->location.x; j < BOARD_X; j++){
+                temp = abs(en->location.y - i) + abs(en->location.y - j);
+                if(temp > en->mobility){ //IF OUT OF MOVEMENT RANGE
+                    continue;
+                }
+                if(board[i][j] == 3 || board[i][j] == 4){ //IN RANGE AND CLOSER TO TARGET UNIT
+                    if(abs(i - un.location.y) + abs(j - un.location.x) < distance){
+                        distance = abs(i - un.location.y) + abs(j - un.location.x);
+                        closestCover.x = j;
+                        closestCover.y = i;
+                    }
+                }
+            }
+        }
+        updateBoard(board, en->location.y, en->location.x, 0);
+        en->location.x = closestCover.x - 1; //Puts on opposite side of cover
+        en->location.y = closestCover.y;
+        updateBoard(board, en->location.y, en->location.x, 2);
+    }
+    return;
+}
+void commandEnemy(int board[BOARD_Y][BOARD_X], enemyUnit *en, unit squad[6], enemyUnit enemies[NUM_ENEMIES]){
+    int i, distance = 1000000000;
+    unit *closestUnit;
+
+    //Find closest player unit
+    for(i = 0; i < SQUAD_SIZE; i++){
+        if(abs(en->location.y - squad[i].location.y) + abs(en->location.y - squad[i].location.y) <= distance){
+            distance = abs(en->location.y - squad[i].location.y) + abs(en->location.y - squad[i].location.y);
+            *closestUnit = squad[i];
+        }
+    }
+    //If closet unit is within range, shoot
+    if(abs(en->location.y - closestUnit->location.y) + abs(en->location.y - closestUnit->location.y)){
+        printf("Enemy @ (%d, %d) shot at %s %s", en->location.x, en->location.y, closestUnit->rank, closestUnit->name);
+        shootEnemy(board, en, closestUnit, distance);
+        //en->ap -=2;
+        system("pause");
+    }
+    else{ //Otherwise move to the closet cover toward the closest unit
+        printf("Enemy @ (%d, %d) moving to ", en->location.x, en->location.y);
+        moveEnemy(board, en, *closestUnit);
+        printf("(%d, %d)\n", en->location.x, en->location.y);
+        system("pause");
+    }
+
+
+    return;
+}
+void enemyTurn(int board[BOARD_Y][BOARD_X], unit squad[6], enemyUnit enemies[NUM_ENEMIES], int *unitsLeft){
+    int i;
+    for(i = 0; i < *unitsLeft; i++){
+        //Check unit is alive first otherwise continue.
+        if(enemies[i].hp < 1)
+            continue;
+        commandEnemy(board, &enemies[i], squad, enemies);
+    }
+    return;
+}
